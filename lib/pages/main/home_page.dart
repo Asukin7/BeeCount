@@ -651,34 +651,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                     height: 48,
                     child: Row(
                       children: [
-                        // 左侧：BeeIcon + 标题 + 账本切换胶囊（用 Expanded 包住，
-                        // 标题在空间富余时显示自然宽度，仅在不够时 ellipsis）
-                        BeeIcon(
-                          color: Theme.of(context).colorScheme.primary,
-                          size: 28,
-                        ),
-                        const SizedBox(width: 4),
+                        // 左侧：账本切换胶囊
                         Expanded(
                           child: Row(
                             children: [
-                              // 标题取自然宽度,溢出时优先压缩账本名而不是 app 名
-                              Text(
-                                AppLocalizations.of(context).homeAppTitle,
-                                maxLines: 1,
-                                softWrap: false,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleLarge
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .textTheme
-                                          .bodyLarge
-                                          ?.color,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
-                              const SizedBox(width: 6),
                               Expanded(
                                 child: Align(
                                   alignment: AlignmentDirectional.centerStart,
@@ -690,19 +666,11 @@ class _HomePageState extends ConsumerState<HomePage> {
                                         onTap: () => showLedgerPicker(context),
                                         child: Container(
                                           padding: const EdgeInsets.symmetric(
-                                            horizontal: 10,
+                                            horizontal: 0,
                                             vertical: 6,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: Theme.of(context)
-                                                        .brightness ==
-                                                    Brightness.dark
-                                                ? Colors.white
-                                                    .withValues(alpha: 0.1)
-                                                : Colors.black
-                                                    .withValues(alpha: 0.05),
-                                            borderRadius:
-                                                BorderRadius.circular(14),
+                                            color: Colors.transparent,
                                           ),
                                           child: Row(
                                             mainAxisSize: MainAxisSize.min,

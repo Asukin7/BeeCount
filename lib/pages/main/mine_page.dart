@@ -559,6 +559,8 @@ class _StatCell extends ConsumerWidget {
   final bool isAmount; // 是否为金额类型
   final String? currencyCode; // 币种代码
   final bool centered; // 是否居中对齐
+  final VoidCallback? onHideToggle;
+  final bool hideIcon;
 
   const _StatCell({
     required this.label,
@@ -568,6 +570,8 @@ class _StatCell extends ConsumerWidget {
     this.isAmount = false,
     this.currencyCode,
     this.centered = false,
+    this.onHideToggle,
+    this.hideIcon = false,
   });
 
   @override
@@ -594,9 +598,28 @@ class _StatCell extends ConsumerWidget {
       children: [
         valueWidget,
         SizedBox(height: 4.0.scaled(context, ref)), // 数字与标签间距增大
-        Text(label,
-            style: labelStyle,
-            textAlign: centered ? TextAlign.center : TextAlign.start),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(label,
+                style: labelStyle,
+                textAlign: centered ? TextAlign.center : TextAlign.start),
+            if (onHideToggle != null) ...[
+              SizedBox(width: 4.0.scaled(context, ref)),
+              GestureDetector(
+                onTap: onHideToggle,
+                child: Icon(
+                  hideIcon
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                  size: 14,
+                  color: labelStyle?.color,
+                ),
+              ),
+            ],
+          ],
+        ),
       ],
     );
   }
@@ -915,126 +938,6 @@ class _MinePageHeaderState extends ConsumerState<_MinePageHeader> {
         children: [
           Column(
             children: [
-              // 头像/Logo
-              GestureDetector(
-                onTap: canEditAvatar ? _showAvatarOptions : null,
-                child: Stack(
-                  children: [
-                    Container(
-                      width: 80.0.scaled(context, ref),
-                      height: 80.0.scaled(context, ref),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .primary
-                            .withValues(alpha: 0.1),
-                        border: Border.all(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .primary
-                              .withValues(alpha: 0.3),
-                          width: 2,
-                        ),
-                      ),
-                      child: ClipOval(
-                        child: _isLoadingAvatar
-                            ? Center(
-                                child: SizedBox(
-                                  width: 20.0.scaled(context, ref),
-                                  height: 20.0.scaled(context, ref),
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                ),
-                              )
-                            : (effectiveAvatarPath != null
-                                ? Image.file(
-                                    // key 加入 path：Flutter 以 (File, key) 区
-                                    // 分不同图片，否则从 A.jpg 换到 B.jpg（路径
-                                    // 不同但 widget 复用）有时仍显示缓存的 A。
-                                    key: ValueKey(effectiveAvatarPath),
-                                    File(effectiveAvatarPath),
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return BeeIcon(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                        size: 40.0.scaled(context, ref),
-                                      );
-                                    },
-                                  )
-                                : BeeIcon(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                    size: 40.0.scaled(context, ref),
-                                  )),
-                      ),
-                    ),
-                    if (canEditAvatar)
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        child: Container(
-                          width: 24.0.scaled(context, ref),
-                          height: 24.0.scaled(context, ref),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
-                          ),
-                          child: Icon(
-                            Icons.camera_alt,
-                            size: 12.0.scaled(context, ref),
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 12.0.scaled(context, ref)),
-              // Slogan with eye icon - 手动偏移让文字视觉居中
-              Padding(
-                padding: EdgeInsets.only(
-                    left: 26.0.scaled(context, ref)), // 偏移量 = 图标(18) + 间距(8)
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center, // 垂直居中对齐
-                  children: [
-                    Text(
-                      AppLocalizations.of(context).mineSlogan,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: BeeTokens.textPrimary(context), // ⭐ 使用 Token
-                            fontWeight: FontWeight.w600,
-                          ),
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(width: 8.0.scaled(context, ref)),
-                    GestureDetector(
-                      onTap: () {
-                        final cur = ref.read(hideAmountsProvider);
-                        ref.read(hideAmountsProvider.notifier).state = !cur;
-                      },
-                      child: Padding(
-                        padding: EdgeInsets.only(top: 2.0.scaled(context, ref)),
-                        child: Icon(
-                          hide
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          size: 18,
-                          color: BeeTokens.textPrimary(context),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 16.0.scaled(context, ref)),
               // 统计数据
               Row(
                 children: [
@@ -1069,6 +972,11 @@ class _MinePageHeaderState extends ConsumerState<_MinePageHeader> {
                             : BeeTokens.error(context),
                       ),
                       centered: true,
+                      onHideToggle: () {
+                        final cur = ref.read(hideAmountsProvider);
+                        ref.read(hideAmountsProvider.notifier).state = !cur;
+                      },
+                      hideIcon: hide,
                     ),
                   ),
                 ],
