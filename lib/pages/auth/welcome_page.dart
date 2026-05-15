@@ -792,6 +792,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
       ref.invalidate(darkModePatternStyleInitProvider);
       ref.invalidate(compactAmountInitProvider);
       ref.invalidate(showTransactionTimeInitProvider);
+      ref.invalidate(transactionTimeFormatInitProvider);
       ref.invalidate(fontScaleInitProvider);
       ref.invalidate(languageProvider);
 
