@@ -1051,7 +1051,7 @@
   "analyticsOverallAvg": "平均值",
   "analyticsTotalIncome": "总收入： ",
   "analyticsTotalExpense": "总支出： ",
-  "analyticsBalance": "结余： ",
+  "analyticsBalance": "结余",
   "analyticsAvgIncome": "{avgLabel}收入： ",
   "analyticsAvgExpense": "{avgLabel}支出： ",
   "analyticsExpense": "支出",

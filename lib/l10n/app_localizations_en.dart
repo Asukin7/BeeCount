@@ -2561,7 +2561,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analyticsTotalExpense => 'Total Expense: ';
 
   @override
-  String get analyticsBalance => 'Balance: ';
+  String get analyticsBalance => 'Balance';
 
   @override
   String analyticsAvgIncome(String avgLabel) {

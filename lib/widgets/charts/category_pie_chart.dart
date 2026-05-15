@@ -150,7 +150,7 @@ class _CategoryPieChartState extends ConsumerState<CategoryPieChart> {
                       }
                     },
                   ),
-                  sectionsSpace: 2,
+                  sectionsSpace: 0,
                   centerSpaceRadius: 50,
                   sections: List.generate(slices.length, (i) {
                     final s = slices[i];

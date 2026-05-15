@@ -1032,7 +1032,7 @@
   "analyticsOverallAvg": "Overall Avg",
   "analyticsTotalIncome": "Total Income: ",
   "analyticsTotalExpense": "Total Expense: ",
-  "analyticsBalance": "Balance: ",
+  "analyticsBalance": "Balance",
   "analyticsAvgIncome": "{avgLabel} Income: ",
   "@analyticsAvgIncome": {
     "placeholders": {

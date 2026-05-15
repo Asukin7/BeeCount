@@ -2561,7 +2561,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get analyticsTotalExpense => '总支出： ';
 
   @override
-  String get analyticsBalance => '结余： ';
+  String get analyticsBalance => '结余';
 
   @override
   String analyticsAvgIncome(String avgLabel) {
@@ -8684,7 +8684,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get analyticsTotalExpense => '總支出： ';
 
   @override
-  String get analyticsBalance => '結餘： ';
+  String get analyticsBalance => '結餘';
 
   @override
   String analyticsAvgIncome(String avgLabel) {

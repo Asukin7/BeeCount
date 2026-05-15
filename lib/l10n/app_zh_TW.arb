@@ -210,7 +210,7 @@
   "analyticsAverage": "{avgLabel}： ",
   "analyticsAvgExpense": "{avgLabel}支出： ",
   "analyticsAvgIncome": "{avgLabel}收入： ",
-  "analyticsBalance": "結餘： ",
+  "analyticsBalance": "結餘",
   "analyticsCategoryRanking": "分類排行",
   "analyticsTotalAmount": "總計",
   "analyticsDailyAvg": "日均",

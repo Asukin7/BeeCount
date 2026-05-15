@@ -4875,7 +4875,7 @@ abstract class AppLocalizations {
   /// No description provided for @analyticsBalance.
   ///
   /// In en, this message translates to:
-  /// **'Balance: '**
+  /// **'Balance'**
   String get analyticsBalance;
 
   /// No description provided for @analyticsAvgIncome.
