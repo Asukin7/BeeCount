@@ -168,6 +168,11 @@ final compactAmountInitProvider = FutureProvider<void>((ref) async {
 // true = 显示日期和时间（时:分）
 final showTransactionTimeProvider = StateProvider<bool>((ref) => false);
 
+// 交易时间格式 Provider
+// 'hms' = HH:mm:ss（默认）
+// 'hm'  = HH:mm
+final transactionTimeFormatProvider = StateProvider<String>((ref) => 'hms');
+
 // 显示交易时间持久化初始化
 final showTransactionTimeInitProvider = FutureProvider<void>((ref) async {
   final prefs = await SharedPreferences.getInstance();
@@ -177,6 +182,19 @@ final showTransactionTimeInitProvider = FutureProvider<void>((ref) async {
   }
   ref.listen<bool>(showTransactionTimeProvider, (prev, next) async {
     await prefs.setBool('showTransactionTime', next);
+    _pushAppearanceToCloud(ref);
+  });
+});
+
+// 交易时间格式持久化初始化
+final transactionTimeFormatInitProvider = FutureProvider<void>((ref) async {
+  final prefs = await SharedPreferences.getInstance();
+  final saved = prefs.getString('transactionTimeFormat');
+  if (saved != null) {
+    ref.read(transactionTimeFormatProvider.notifier).state = saved;
+  }
+  ref.listen<String>(transactionTimeFormatProvider, (prev, next) async {
+    await prefs.setString('transactionTimeFormat', next);
     _pushAppearanceToCloud(ref);
   });
 });
@@ -211,6 +229,7 @@ void _pushAppearanceToCloud(Ref ref) {
         'header_decoration_style': ref.read(headerDecorationStyleProvider),
         'compact_amount': ref.read(compactAmountProvider),
         'show_transaction_time': ref.read(showTransactionTimeProvider),
+        'transaction_time_format': ref.read(transactionTimeFormatProvider),
       };
       await cloudProvider.updateMyProfileAppearance(appearance: appearance);
       logger.info('theme_providers',

@@ -11669,6 +11669,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enable on the Web app →'**
   String get twofaStatusOpenWeb;
+
+  /// 交易时间格式设置项标题
+  ///
+  /// In en, this message translates to:
+  /// **'Time Format'**
+  String get transactionTimeFormat;
+
+  /// 时分秒格式选项
+  ///
+  /// In en, this message translates to:
+  /// **'HH:mm:ss'**
+  String get transactionTimeFormatHms;
+
+  /// 时分格式选项
+  ///
+  /// In en, this message translates to:
+  /// **'HH:mm'**
+  String get transactionTimeFormatHm;
+
+  /// 交易时间格式设置项禁用提示
+  ///
+  /// In en, this message translates to:
+  /// **'Enable \"Show Time\" first'**
+  String get transactionTimeFormatDisabledHint;
+
+  /// No description provided for @batchBillingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recognition Results'**
+  String get batchBillingTitle;
+
+  /// No description provided for @batchBillingProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Recognizing {current}/{total}...'**
+  String batchBillingProgress(int current, int total);
+
+  /// No description provided for @batchBillingUnrecognized.
+  ///
+  /// In en, this message translates to:
+  /// **'Unrecognized'**
+  String get batchBillingUnrecognized;
+
+  /// No description provided for @batchBillingEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No more records'**
+  String get batchBillingEmpty;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -320,6 +320,13 @@ class _ConfigImportExportPageState
         logger.info('ConfigImport', '交易时间显示已刷新: $showTransactionTime');
       }
 
+      // 刷新交易时间格式
+      final transactionTimeFormat = prefs.getString('transactionTimeFormat');
+      if (transactionTimeFormat != null) {
+        ref.read(transactionTimeFormatProvider.notifier).state = transactionTimeFormat;
+        logger.info('ConfigImport', '交易时间格式已刷新: $transactionTimeFormat');
+      }
+
       logger.info('ConfigImport', 'Provider 状态刷新完成');
     } catch (e) {
       logger.error('ConfigImport', '刷新 Provider 状态失败: $e');

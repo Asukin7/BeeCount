@@ -381,7 +381,17 @@ class BillCreationService {
     }
 
     // 6. 确定交易时间（优先使用识别的时间，否则使用当前时间）
-    final DateTime happenedAt = result.time ?? DateTime.now();
+    DateTime happenedAt = result.time ?? DateTime.now();
+
+    // hm 格式下强制秒为 0
+    final billPrefs = await SharedPreferences.getInstance();
+    final billFmt = billPrefs.getString('transactionTimeFormat') ?? 'hms';
+    if (billFmt == 'hm') {
+      happenedAt = DateTime(
+        happenedAt.year, happenedAt.month, happenedAt.day,
+        happenedAt.hour, happenedAt.minute,
+      );
+    }
 
     // 7. 获取分类和账户名称（用于日志）
     String? categoryName;

@@ -6126,4 +6126,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get twofaStatusOpenWeb => 'Enable on the Web app →';
+
+  @override
+  String get transactionTimeFormat => 'Time Format';
+
+  @override
+  String get transactionTimeFormatHms => 'HH:mm:ss';
+
+  @override
+  String get transactionTimeFormatHm => 'HH:mm';
+
+  @override
+  String get transactionTimeFormatDisabledHint => 'Enable \"Show Time\" first';
+
+  @override
+  String get batchBillingTitle => 'Recognition Results';
+
+  @override
+  String batchBillingProgress(int current, int total) {
+    return 'Recognizing $current/$total...';
+  }
+
+  @override
+  String get batchBillingUnrecognized => 'Unrecognized';
+
+  @override
+  String get batchBillingEmpty => 'No more records';
 }

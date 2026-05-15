@@ -6126,6 +6126,32 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get twofaStatusOpenWeb => '前往 Web 端启用 →';
+
+  @override
+  String get transactionTimeFormat => '交易时间格式';
+
+  @override
+  String get transactionTimeFormatHms => '时分秒(HH:mm:ss)';
+
+  @override
+  String get transactionTimeFormatHm => '时分(HH:mm)';
+
+  @override
+  String get transactionTimeFormatDisabledHint => '需先开启显示交易时间';
+
+  @override
+  String get batchBillingTitle => '识别结果';
+
+  @override
+  String batchBillingProgress(int current, int total) {
+    return '正在识别 $current/$total...';
+  }
+
+  @override
+  String get batchBillingUnrecognized => '未识别';
+
+  @override
+  String get batchBillingEmpty => '没有更多记录';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -12222,4 +12248,30 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get twofaStatusOpenWeb => '前往 Web 端啟用 →';
+
+  @override
+  String get transactionTimeFormat => '交易時間格式';
+
+  @override
+  String get transactionTimeFormatHms => '時分秒(HH:mm:ss)';
+
+  @override
+  String get transactionTimeFormatHm => '時分(HH:mm)';
+
+  @override
+  String get transactionTimeFormatDisabledHint => '需先開啟顯示交易時間';
+
+  @override
+  String get batchBillingTitle => '識別結果';
+
+  @override
+  String batchBillingProgress(int current, int total) {
+    return '正在識別 $current/$total...';
+  }
+
+  @override
+  String get batchBillingUnrecognized => '未識別';
+
+  @override
+  String get batchBillingEmpty => '沒有更多記錄';
 }

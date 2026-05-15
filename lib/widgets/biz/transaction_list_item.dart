@@ -70,12 +70,14 @@ class TransactionListItem extends ConsumerWidget {
     // 显示完整日期模式
     if (showFullDate && happenedAt != null) return true;
 
-    // 显示时间（设置开启 + 有数据 + 不是00:00:00）
-    final showTime = ref.watch(showTransactionTimeProvider) &&
-        happenedAt != null &&
-        (happenedAt!.hour != 0 || happenedAt!.minute != 0 || happenedAt!.second != 0);
+    // 显示时间（设置开启 + 有数据）
+    final showTimeEnabled = ref.watch(showTransactionTimeProvider) && happenedAt != null;
+    final fmt = ref.watch(transactionTimeFormatProvider);
+    final hasTime = showTimeEnabled && (fmt == 'hm'
+        ? (happenedAt!.hour != 0 || happenedAt!.minute != 0)
+        : (happenedAt!.hour != 0 || happenedAt!.minute != 0 || happenedAt!.second != 0));
 
-    return showTime || accountName != null || attachmentCount > 0;
+    return hasTime || accountName != null || attachmentCount > 0;
   }
 
   /// 构建次要信息小部件（时间 · 账户 + 附件图标）
@@ -90,12 +92,22 @@ class TransactionListItem extends ConsumerWidget {
           '${happenedAt!.year}-${happenedAt!.month.toString().padLeft(2, '0')}-${happenedAt!.day.toString().padLeft(2, '0')} '
           '${happenedAt!.hour.toString().padLeft(2, '0')}:${happenedAt!.minute.toString().padLeft(2, '0')}',
         );
-      } else if (ref.watch(showTransactionTimeProvider) &&
-          (happenedAt!.hour != 0 || happenedAt!.minute != 0 || happenedAt!.second != 0)) {
-        // 完整时间模式（HH:mm:ss）
-        parts.add(
-          '${happenedAt!.hour.toString().padLeft(2, '0')}:${happenedAt!.minute.toString().padLeft(2, '0')}:${happenedAt!.second.toString().padLeft(2, '0')}',
-        );
+      } else if (ref.watch(showTransactionTimeProvider)) {
+        final fmt = ref.watch(transactionTimeFormatProvider);
+        final hasTime = fmt == 'hm'
+            ? (happenedAt!.hour != 0 || happenedAt!.minute != 0)
+            : (happenedAt!.hour != 0 || happenedAt!.minute != 0 || happenedAt!.second != 0);
+        if (hasTime) {
+          if (fmt == 'hm') {
+            parts.add(
+              '${happenedAt!.hour.toString().padLeft(2, '0')}:${happenedAt!.minute.toString().padLeft(2, '0')}',
+            );
+          } else {
+            parts.add(
+              '${happenedAt!.hour.toString().padLeft(2, '0')}:${happenedAt!.minute.toString().padLeft(2, '0')}:${happenedAt!.second.toString().padLeft(2, '0')}',
+            );
+          }
+        }
       }
     }
 

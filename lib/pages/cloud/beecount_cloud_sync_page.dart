@@ -68,6 +68,7 @@ class _BeeCountCloudSyncPageState extends ConsumerState<BeeCountCloudSyncPage> {
         currentHeaderStyle: ref.read(headerDecorationStyleProvider),
         currentCompactAmount: ref.read(compactAmountProvider),
         currentShowTransactionTime: ref.read(showTransactionTimeProvider),
+        currentTransactionTimeFormat: ref.read(transactionTimeFormatProvider),
       );
       // 再从 server 拉一遍应用到本地,B 设备能读到 A 刚推的
       await engine.syncMyProfile();

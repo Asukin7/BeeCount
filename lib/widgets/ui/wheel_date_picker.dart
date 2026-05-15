@@ -263,6 +263,7 @@ Future<DateTime?> showWheelDateTimePicker(
   BuildContext context, {
   required DateTime initial,
   DateTime? maxDate,
+  bool showSeconds = true,
 }) async {
   // 第一步：选择日期
   final dateResult = await showModalBottomSheet<DateTime>(
@@ -292,6 +293,7 @@ Future<DateTime?> showWheelDateTimePicker(
       initialHour: initial.hour,
       initialMinute: initial.minute,
       initialSecond: initial.second,
+      showSeconds: showSeconds,
     ),
   );
 
@@ -304,7 +306,7 @@ Future<DateTime?> showWheelDateTimePicker(
     dateResult.day,
     timeResult.hour,
     timeResult.minute,
-    timeResult.second,
+    showSeconds ? timeResult.second : 0,
   );
 }
 
@@ -507,11 +509,13 @@ class _TimeStepPicker extends StatefulWidget {
   final int initialHour;
   final int initialMinute;
   final int initialSecond;
+  final bool showSeconds;
 
   const _TimeStepPicker({
     required this.initialHour,
     required this.initialMinute,
     required this.initialSecond,
+    this.showSeconds = true,
   });
 
   @override
@@ -616,18 +620,20 @@ class _TimeStepPickerState extends State<_TimeStepPicker> {
                       )),
                     ),
                   ),
-                  Text(':', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: BeeTokens.textPrimary(context))),
-                  Expanded(
-                    child: CupertinoPicker(
-                      scrollController: _secondCtrl,
-                      itemExtent: 40,
-                      onSelectedItemChanged: (index) => setState(() => second = index),
-                      children: List.generate(60, (index) => Center(
-                        child: Text(index.toString().padLeft(2, '0'),
-                          style: TextStyle(fontSize: 20, color: BeeTokens.textPrimary(context))),
-                      )),
+                  if (widget.showSeconds) ...[
+                    Text(':', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: BeeTokens.textPrimary(context))),
+                    Expanded(
+                      child: CupertinoPicker(
+                        scrollController: _secondCtrl,
+                        itemExtent: 40,
+                        onSelectedItemChanged: (index) => setState(() => second = index),
+                        children: List.generate(60, (index) => Center(
+                          child: Text(index.toString().padLeft(2, '0'),
+                            style: TextStyle(fontSize: 20, color: BeeTokens.textPrimary(context))),
+                        )),
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),

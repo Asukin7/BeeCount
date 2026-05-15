@@ -2435,5 +2435,31 @@
     }
   },
   "twofaStatusManageHint": "請前往 Web 端管理(啟用 / 禁用 / 重新生成恢復碼)",
-  "twofaStatusOpenWeb": "前往 Web 端啟用 →"
+  "twofaStatusOpenWeb": "前往 Web 端啟用 →",
+  "transactionTimeFormat": "交易時間格式",
+  "@transactionTimeFormat": {
+    "description": "交易时间格式设置项标题"
+  },
+  "transactionTimeFormatHms": "時分秒(HH:mm:ss)",
+  "@transactionTimeFormatHms": {
+    "description": "时分秒格式选项"
+  },
+  "transactionTimeFormatHm": "時分(HH:mm)",
+  "@transactionTimeFormatHm": {
+    "description": "时分格式选项"
+  },
+  "transactionTimeFormatDisabledHint": "需先開啟顯示交易時間",
+  "@transactionTimeFormatDisabledHint": {
+    "description": "交易时间格式设置项禁用提示"
+  },
+  "batchBillingTitle": "識別結果",
+  "batchBillingProgress": "正在識別 {current}/{total}...",
+  "@batchBillingProgress": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "batchBillingUnrecognized": "未識別",
+  "batchBillingEmpty": "沒有更多記錄"
 }

@@ -130,6 +130,18 @@ class AppearanceSettingsPage extends ConsumerWidget {
                           ref.read(showTransactionTimeProvider.notifier).state = !current;
                         },
                       ),
+                      // 交易时间格式（仅当显示交易时间开启时可编辑）
+                      AppListTile(
+                        leading: Icons.timer_outlined,
+                        title: l10n.transactionTimeFormat,
+                        subtitle: ref.watch(showTransactionTimeProvider)
+                            ? (ref.watch(transactionTimeFormatProvider) == 'hm'
+                                ? l10n.transactionTimeFormatHm
+                                : l10n.transactionTimeFormatHms)
+                            : l10n.transactionTimeFormatDisabledHint,
+                        enabled: ref.watch(showTransactionTimeProvider),
+                        onTap: () => _showTimeFormatDialog(context, ref, l10n),
+                      ),
                       BeeTokens.cardDivider(context),
                       // 收支颜色方案
                       AppListTile(
@@ -513,6 +525,74 @@ class AppearanceSettingsPage extends ConsumerWidget {
           : null,
       onTap: () {
         ref.read(incomeExpenseColorSchemeProvider.notifier).state = value;
+        Navigator.pop(context);
+      },
+    );
+  }
+
+  /// 显示交易时间格式选择对话框
+  void _showTimeFormatDialog(BuildContext context, WidgetRef ref, AppLocalizations l10n) {
+    final currentFormat = ref.read(transactionTimeFormatProvider);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: BeeTokens.surfaceElevated(context),
+        title: Text(
+          l10n.transactionTimeFormat,
+          style: TextStyle(color: BeeTokens.textPrimary(context)),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildTimeFormatOption(
+              context, ref,
+              title: l10n.transactionTimeFormatHms,
+              value: 'hms',
+              currentValue: currentFormat,
+              icon: Icons.timer_outlined,
+            ),
+            _buildTimeFormatOption(
+              context, ref,
+              title: l10n.transactionTimeFormatHm,
+              value: 'hm',
+              currentValue: currentFormat,
+              icon: Icons.schedule_outlined,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimeFormatOption(
+    BuildContext context,
+    WidgetRef ref, {
+    required String title,
+    required String value,
+    required String currentValue,
+    required IconData icon,
+  }) {
+    final isSelected = value == currentValue;
+    final primaryColor = ref.watch(primaryColorProvider);
+
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: isSelected ? primaryColor : BeeTokens.iconSecondary(context),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: isSelected ? primaryColor : BeeTokens.textPrimary(context),
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        ),
+      ),
+      trailing: isSelected
+          ? Icon(Icons.check, color: primaryColor)
+          : null,
+      onTap: () {
+        ref.read(transactionTimeFormatProvider.notifier).state = value;
         Navigator.pop(context);
       },
     );

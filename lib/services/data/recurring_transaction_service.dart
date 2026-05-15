@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:collection/collection.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/db.dart';
 
 /// 重复交易频率枚举
@@ -174,6 +175,15 @@ class RecurringTransactionService {
           final nextDate = calculateNextDate(currentRecurring);
           if (nextDate == null) break;
 
+          // hm 格式下秒清零
+          final recurPrefs = await SharedPreferences.getInstance();
+          final recurFmt = recurPrefs.getString('transactionTimeFormat') ?? 'hms';
+          DateTime finalNextDate = nextDate;
+          if (recurFmt == 'hm') {
+            finalNextDate = DateTime(nextDate.year, nextDate.month, nextDate.day,
+                nextDate.hour, nextDate.minute);
+          }
+
           // 生成交易记录
           final transactionId = await repository.addTransaction(
             ledgerId: currentRecurring.ledgerId,
@@ -182,7 +192,7 @@ class RecurringTransactionService {
             categoryId: currentRecurring.categoryId,
             accountId: currentRecurring.accountId,
             toAccountId: currentRecurring.toAccountId,
-            happenedAt: nextDate,
+            happenedAt: finalNextDate,
             note: currentRecurring.note,
           );
 

@@ -2773,5 +2773,31 @@
     }
   },
   "twofaStatusManageHint": "Manage from the Web app (enable / disable / regenerate recovery codes)",
-  "twofaStatusOpenWeb": "Enable on the Web app →"
+  "twofaStatusOpenWeb": "Enable on the Web app →",
+  "transactionTimeFormat": "Time Format",
+  "@transactionTimeFormat": {
+    "description": "交易时间格式设置项标题"
+  },
+  "transactionTimeFormatHms": "HH:mm:ss",
+  "@transactionTimeFormatHms": {
+    "description": "时分秒格式选项"
+  },
+  "transactionTimeFormatHm": "HH:mm",
+  "@transactionTimeFormatHm": {
+    "description": "时分格式选项"
+  },
+  "transactionTimeFormatDisabledHint": "Enable \"Show Time\" first",
+  "@transactionTimeFormatDisabledHint": {
+    "description": "交易时间格式设置项禁用提示"
+  },
+  "batchBillingTitle": "Recognition Results",
+  "batchBillingProgress": "Recognizing {current}/{total}...",
+  "@batchBillingProgress": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "batchBillingUnrecognized": "Unrecognized",
+  "batchBillingEmpty": "No more records"
 }

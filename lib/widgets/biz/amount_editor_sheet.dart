@@ -175,10 +175,12 @@ class _AmountEditorSheetState extends ConsumerState<AmountEditorSheet> {
 
     if (showTime) {
       // 显示时间功能开启时，使用两步选择器（先日期后时间）
+      final fmt = ref.read(transactionTimeFormatProvider);
       final res = await showWheelDateTimePicker(
         context,
         initial: _date,
         maxDate: DateTime.now(),
+        showSeconds: fmt == 'hms',
       );
       if (res != null) setState(() => _date = res);
     } else {
@@ -271,7 +273,13 @@ class _AmountEditorSheetState extends ConsumerState<AmountEditorSheet> {
     }
 
     String fmtDate(DateTime d) => '${d.year}/${d.month}/${d.day}';
-    String fmtTime(DateTime d) => '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}:${d.second.toString().padLeft(2, '0')}';
+    final fmt = ref.watch(transactionTimeFormatProvider);
+    String fmtTime(DateTime d) {
+      if (fmt == 'hm') {
+        return '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+      }
+      return '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}:${d.second.toString().padLeft(2, '0')}';
+    }
     final showTime = ref.watch(showTransactionTimeProvider);
 
     return SafeArea(
@@ -555,12 +563,16 @@ class _AmountEditorSheetState extends ConsumerState<AmountEditorSheet> {
 
                               HapticFeedback.lightImpact();
                               SystemSound.play(SystemSoundType.click);
+                              final fmt = ref.read(transactionTimeFormatProvider);
+                              final submitDate = fmt == 'hm'
+                                  ? DateTime(_date.year, _date.month, _date.day, _date.hour, _date.minute)
+                                  : _date;
                               widget.onSubmit((
                                 amount: total.abs(), // 始终正数
                                 note: _noteCtrl.text.isEmpty
                                     ? null
                                     : _noteCtrl.text,
-                                date: _date,
+                                date: submitDate,
                                 accountId: _selectedAccountId,
                                 tagIds: _selectedTagIds,
                                 pendingAttachments: _pendingAttachments,
