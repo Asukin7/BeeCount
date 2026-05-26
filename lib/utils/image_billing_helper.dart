@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../l10n/app_localizations.dart';
+import '../pages/billing/batch_billing_result_page.dart';
 import '../providers.dart';
 import '../services/billing/ocr_service.dart';
 import '../services/billing/bill_creation_service.dart';
@@ -18,11 +19,15 @@ class ImageBillingHelper {
     BuildContext context,
     WidgetRef ref,
   ) async {
-    await _processImageBilling(
-      context,
-      ref,
-      ImageSource.gallery,
+    final imagePicker = ImagePicker();
+    final pickedFiles = await imagePicker.pickMultiImage(
+      maxWidth: 1920,
+      maxHeight: 1920,
+      imageQuality: 85,
     );
+    if (pickedFiles.isEmpty) return;
+
+    await _processBatchImages(context, ref, pickedFiles);
   }
 
   /// 打开相机拍照并自动记账
@@ -30,11 +35,16 @@ class ImageBillingHelper {
     BuildContext context,
     WidgetRef ref,
   ) async {
-    await _processImageBilling(
-      context,
-      ref,
-      ImageSource.camera,
+    final imagePicker = ImagePicker();
+    final pickedFile = await imagePicker.pickImage(
+      source: ImageSource.camera,
+      maxWidth: 1920,
+      maxHeight: 1920,
+      imageQuality: 85,
     );
+    if (pickedFile == null) return;
+
+    await _processBatchImages(context, ref, [pickedFile]);
   }
 
   /// 处理图片识别记账（统一逻辑）
@@ -167,6 +177,136 @@ class ImageBillingHelper {
       // 尝试关闭可能还在显示的加载对话框
       Navigator.of(context).popUntil((route) => route.isFirst);
       showToast(context, l10n.aiOcrFailed(e.toString()));
+    }
+  }
+
+  /// 批量处理多张图片：逐张 OCR 识别 → 入库 → 跳转识别结果页
+  static Future<void> _processBatchImages(
+    BuildContext context,
+    WidgetRef ref,
+    List<XFile> files,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final total = files.length;
+    final progressNotifier = ValueNotifier<int>(0);
+
+    // 显示进度 Dialog（不可取消）
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => Center(
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(),
+                const SizedBox(height: 16),
+                ValueListenableBuilder<int>(
+                  valueListenable: progressNotifier,
+                  builder: (_, current, __) {
+                    return Text(
+                      l10n.batchBillingProgress(current + 1, total),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final ocrService = OcrService();
+    final repo = ref.read(repositoryProvider);
+    final billCreationService = BillCreationService(repo);
+    final autoAddTags = ref.read(smartBillingAutoTagsProvider);
+    final autoAddAttachment = ref.read(smartBillingAutoAttachmentProvider);
+    final currentLedger = await ref.read(currentLedgerProvider.future);
+
+    if (currentLedger == null) {
+      if (!context.mounted) return;
+      Navigator.of(context).pop();
+      showToast(context, l10n.aiOcrNoLedger);
+      return;
+    }
+
+    final transactionIds = <int?>[];
+
+    try {
+      for (var i = 0; i < files.length; i++) {
+        progressNotifier.value = i;
+        final imageFile = File(files[i].path);
+        try {
+          final ocrResult = await ocrService.recognizePaymentImage(
+            imageFile,
+            repo: repo,
+          );
+
+          // 识别成功且有金额 → 立即入库
+          int? transactionId;
+          if (ocrResult.amount != null && ocrResult.amount!.abs() > 0) {
+            final billingTypes = <String>[TagSeedService.billingTypeImage];
+            if (ocrResult.aiEnhanced) {
+              billingTypes.add(TagSeedService.billingTypeAi);
+            }
+            transactionId = await billCreationService.createBillTransaction(
+              result: ocrResult,
+              ledgerId: currentLedger.id,
+              note: ocrResult.note,
+              billingTypes: billingTypes,
+              l10n: l10n,
+              autoAddTags: autoAddTags,
+            );
+            // 保存附件
+            if (transactionId != null && autoAddAttachment) {
+              try {
+                final attachmentService = ref.read(attachmentServiceProvider);
+                await attachmentService.saveAttachment(
+                  transactionId: transactionId,
+                  sourceFile: imageFile,
+                  index: 0,
+                );
+              } catch (_) {}
+            }
+          }
+
+          transactionIds.add(transactionId);
+        } catch (e) {
+          // 单张识别失败，记录为 null（未识别项）
+          transactionIds.add(null);
+        }
+      }
+
+      // 统一后处理
+      await PostProcessor.run(
+        ref,
+        ledgerId: currentLedger.id,
+        tags: true,
+        attachments: autoAddAttachment,
+      );
+
+      if (!context.mounted) return;
+
+      // 关闭进度 Dialog
+      Navigator.of(context).pop();
+
+      // 跳转识别结果页
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => BatchBillingResultPage(
+              transactionIds: transactionIds),
+        ),
+      );
+    } catch (e) {
+      // 异常时关闭进度 Dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        showToast(context, l10n.aiOcrFailed(e.toString()));
+      }
+    } finally {
+      progressNotifier.dispose();
     }
   }
 }
