@@ -260,13 +260,85 @@ class _ColorPicker extends StatefulWidget {
 }
 
 class _ColorPickerState extends State<_ColorPicker> {
-  HSVColor currentColor = HSVColor.fromColor(Colors.blue);
+  late HSVColor currentColor;
+  late TextEditingController _hexController;
+  bool _isEditingHex = false;
+  final _hexFocusNode = FocusNode();
+
+  /// 获取当前实际颜色的亮度（用于文字颜色判断）
+  double get _brightness => currentColor.value;
+
+  @override
+  void initState() {
+    super.initState();
+    currentColor = HSVColor.fromColor(Colors.blue);
+    _hexController = TextEditingController(text: _colorToHex(Colors.blue));
+    _hexFocusNode.addListener(() {
+      if (!_hexFocusNode.hasFocus && _isEditingHex) {
+        _commitHexInput();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _hexController.dispose();
+    _hexFocusNode.dispose();
+    super.dispose();
+  }
+
+  /// 将 Color 转为 HEX 字符串（#RRGGBB）
+  static String _colorToHex(Color color) {
+    final r = (color.r * 255).round().toRadixString(16).padLeft(2, '0');
+    final g = (color.g * 255).round().toRadixString(16).padLeft(2, '0');
+    final b = (color.b * 255).round().toRadixString(16).padLeft(2, '0');
+    return '#$r$g$b'.toUpperCase();
+  }
+
+  /// 解析 HEX 字符串为 Color，支持 #RRGGBB 和 RRGGBB
+  Color? _hexToColor(String hex) {
+    hex = hex.trim();
+    if (hex.startsWith('#')) hex = hex.substring(1);
+    if (hex.length != 6) return null;
+    final value = int.tryParse(hex, radix: 16);
+    if (value == null) return null;
+    final r = (value >> 16) & 0xFF;
+    final g = (value >> 8) & 0xFF;
+    final b = value & 0xFF;
+    return Color.fromARGB(255, r, g, b);
+  }
+
+  void _commitHexInput() {
+    final parsed = _hexToColor(_hexController.text);
+    if (parsed != null) {
+      setState(() {
+        currentColor = HSVColor.fromColor(parsed);
+        _isEditingHex = false;
+      });
+      // 直接设置 controller 文本为用户输入的原始值，不做任何转换
+      final hex = _hexController.text.trim();
+      final cleanHex = hex.startsWith('#') ? hex.substring(1) : hex;
+      _hexController.text = '#${cleanHex.toUpperCase()}';
+    } else {
+      // 无效输入，恢复为当前颜色的 HEX 值
+      _hexController.text = _colorToHex(currentColor.toColor());
+      setState(() => _isEditingHex = false);
+    }
+  }
+
+  /// 滑块变化时更新 HEX 文本
+  void _onSliderChanged() {
+    _hexController.text = _colorToHex(currentColor.toColor());
+  }
 
   @override
   Widget build(BuildContext context) {
+    final textColor = _brightness > 0.5 ? Colors.black : Colors.white;
+    final displayColor = currentColor.toColor();
+
     return SizedBox(
       width: 320,
-      height: 400,
+      height: 420,
       child: Column(
         children: [
           // 颜色预览
@@ -274,19 +346,67 @@ class _ColorPickerState extends State<_ColorPicker> {
             width: double.infinity,
             height: 80,
             decoration: BoxDecoration(
-              color: currentColor.toColor(),
+              color: displayColor,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: BeeTokens.borderStrong(context), width: 1),
             ),
             child: Center(
-              child: Text(
-                '#${currentColor.toColor().r.round().toRadixString(16).padLeft(2, '0')}${currentColor.toColor().g.round().toRadixString(16).padLeft(2, '0')}${currentColor.toColor().b.round().toRadixString(16).padLeft(2, '0')}'.toUpperCase(),
-                style: TextStyle(
-                  color: currentColor.value > 0.5 ? Colors.black : Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
+              child: _isEditingHex
+                  ? SizedBox(
+                      width: 120,
+                      child: TextField(
+                        controller: _hexController,
+                        focusNode: _hexFocusNode,
+                        style: TextStyle(
+                          color: textColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                        textAlign: TextAlign.center,
+                        autofocus: true,
+                        decoration: InputDecoration(
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: textColor.withValues(alpha: 0.3)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: textColor, width: 2),
+                          ),
+                        ),
+                        onSubmitted: (_) => _commitHexInput(),
+                      ),
+                    )
+                  : GestureDetector(
+                      onTap: () {
+                        setState(() => _isEditingHex = true);
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          _hexFocusNode.requestFocus();
+                          _hexController.selection = TextSelection(baseOffset: 0, extentOffset: _hexController.text.length);
+                        });
+                      },
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _hexController.text,
+                            style: TextStyle(
+                              color: textColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.edit,
+                            size: 16,
+                            color: textColor.withValues(alpha: 0.6),
+                          ),
+                        ],
+                      ),
+                    ),
             ),
           ),
           const SizedBox(height: 20),
@@ -315,6 +435,7 @@ class _ColorPickerState extends State<_ColorPicker> {
                 onChanged: (value) {
                   setState(() {
                     currentColor = currentColor.withHue(value);
+                    _onSliderChanged();
                   });
                 },
               ),
@@ -350,6 +471,7 @@ class _ColorPickerState extends State<_ColorPicker> {
                 onChanged: (value) {
                   setState(() {
                     currentColor = currentColor.withSaturation(value);
+                    _onSliderChanged();
                   });
                 },
               ),
@@ -385,6 +507,7 @@ class _ColorPickerState extends State<_ColorPicker> {
                 onChanged: (value) {
                   setState(() {
                     currentColor = currentColor.withValue(value);
+                    _onSliderChanged();
                   });
                 },
               ),
@@ -397,10 +520,10 @@ class _ColorPickerState extends State<_ColorPicker> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () => widget.onColorSelected(currentColor.toColor()),
+              onPressed: () => widget.onColorSelected(displayColor),
               style: ElevatedButton.styleFrom(
-                backgroundColor: currentColor.toColor(),
-                foregroundColor: currentColor.value > 0.5 ? Colors.black : Colors.white,
+                backgroundColor: displayColor,
+                foregroundColor: textColor,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
